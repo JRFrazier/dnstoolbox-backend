@@ -82,6 +82,3 @@ app.use(
 app.listen(4000, () =>
   console.log("Express GraphQL Server Now Running On localhost:4000/graphql")
 );
-
-curl -X POST -H "Content-Type: application/json" --data '{ "query": "{ allCourses {title}}" }' http://dnstoolbox.io
-
