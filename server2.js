@@ -70,6 +70,7 @@ var root = {
 };
 // Create an express server and a GraphQL endpoint
 var app = express();
+app.use(cors());
 app.use(
   "/graphql",
   express_graphql({
@@ -78,6 +79,6 @@ app.use(
     graphiql: true
   })
 );
-app.listen(80, () =>
-  console.log("Express GraphQL Server Now Running On localhost:80/graphql")
+app.listen(4000, () =>
+  console.log("Express GraphQL Server Now Running On localhost:4000/graphql")
 );
