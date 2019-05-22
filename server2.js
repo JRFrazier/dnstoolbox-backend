@@ -72,6 +72,7 @@ var root = {
 var app = express();
 app.use(
   "/graphql",
+  cors(),
   express_graphql({
     schema: schema,
     rootValue: root,
@@ -81,3 +82,6 @@ app.use(
 app.listen(4000, () =>
   console.log("Express GraphQL Server Now Running On localhost:4000/graphql")
 );
+
+curl -X POST -H "Content-Type: application/json" --data '{ "query": "{ allCourses {title}}" }' http://dnstoolbox.io
+
