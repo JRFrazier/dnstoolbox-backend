@@ -2,6 +2,8 @@ var express = require("express");
 var express_graphql = require("express-graphql");
 var { buildSchema } = require("graphql");
 var cors = require("cors");
+const api_helper = require("./API_helper");
+const request = require("request");
 
 // GraphQL schema
 var schema = buildSchema(`
@@ -9,6 +11,7 @@ var schema = buildSchema(`
         allCourses: [Course]
         course(id: Int!): Course
         courses(topic: String): [Course]
+        dig: Dig
     },
     type Course {
         id: Int
@@ -17,6 +20,14 @@ var schema = buildSchema(`
         description: String
         topic: String
         url: String
+    },
+    type Dig {
+      host: String
+      responsetime: Int
+      recordtype: String
+      checkedata: String
+      location: String
+      result: [String]
     }
 `);
 var coursesData = [
@@ -48,6 +59,7 @@ var coursesData = [
     url: "https://codingthesmartway.com/courses/understand-javascript/"
   }
 ];
+var app = express();
 var getCourse = function(args) {
   var id = args.id;
   return coursesData.filter(course => {
@@ -63,15 +75,38 @@ var getCourses = function(args) {
   }
 };
 const getAllCourses = () => {
+  console.log(coursesData);
   return coursesData;
 };
+
+let theDig = null;
+
+const runDig = request(
+  "http://sonarliteremote1.constellix.com/dig/usnyc01-mon02.nodes.constellix.net/dnsmadeeasy.com/8.8.4.4?recordtype=A",
+  { json: true },
+  (err, res, body) => {
+    if (err) {
+      return console.log(err);
+    }
+    console.log(body);
+    theDig = body;
+  }
+);
+
+const getDig = () => {
+  console.log(theDig);
+  return theDig;
+};
+
 var root = {
   allCourses: getAllCourses,
   course: getCourse,
-  courses: getCourses
+  courses: getCourses,
+  dig: getDig
 };
 // Create an express server and a GraphQL endpoint
 var app = express();
+
 app.use(
   "/graphql",
   cors(),
@@ -81,6 +116,7 @@ app.use(
     graphiql: true
   })
 );
+
 app.listen(4000, () =>
   console.log("Express GraphQL Server Now Running On localhost:4000/graphql")
 );
