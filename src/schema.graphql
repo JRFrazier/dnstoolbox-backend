@@ -1,0 +1,15 @@
+type Query {
+    dig(host: String!): Dig
+    dtrace(host: String!): Dtrace
+},
+type Dig {
+  host: String
+  responsetime: Int
+  recordtype: String
+  checkedata: String
+  location: String
+  result: [String]
+},
+type Dtrace {
+  result: String
+}

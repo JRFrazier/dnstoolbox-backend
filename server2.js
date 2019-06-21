@@ -4,6 +4,8 @@ var { buildSchema } = require("graphql");
 var cors = require("cors");
 const api_helper = require("./API_helper");
 const request = require("request");
+const axios = require('axios');
+
 
 // GraphQL schema
 var schema = buildSchema(`
@@ -11,7 +13,8 @@ var schema = buildSchema(`
         allCourses: [Course]
         course(id: Int!): Course
         courses(topic: String): [Course]
-        dig: Dig
+        dig(host: String!): Dig
+        dtrace(host: String!): Dtrace
     },
     type Course {
         id: Int
@@ -28,6 +31,9 @@ var schema = buildSchema(`
       checkedata: String
       location: String
       result: [String]
+    },
+    type Dtrace {
+      result: String
     }
 `);
 var coursesData = [
@@ -59,14 +65,16 @@ var coursesData = [
     url: "https://codingthesmartway.com/courses/understand-javascript/"
   }
 ];
-var app = express();
-var getCourse = function(args) {
+const app = express();
+
+const getCourse = function(args) {
   var id = args.id;
   return coursesData.filter(course => {
     return course.id == id;
   })[0];
 };
-var getCourses = function(args) {
+
+const getCourses = function(args) {
   if (args.topic) {
     var topic = args.topic;
     return coursesData.filter(course => course.topic === topic);
@@ -74,38 +82,37 @@ var getCourses = function(args) {
     return coursesData;
   }
 };
+
 const getAllCourses = () => {
   console.log(coursesData);
   return coursesData;
 };
 
-let theDig = null;
+const getDig = (args) => {
+  let reqString = `http://sonarliteremote1.constellix.com/dig/usnyc01-mon02.nodes.constellix.net/${args.host}/8.8.4.4?recordtype=A` 
 
-const runDig = request(
-  "http://sonarliteremote1.constellix.com/dig/usnyc01-mon02.nodes.constellix.net/dnsmadeeasy.com/8.8.4.4?recordtype=A",
-  { json: true },
-  (err, res, body) => {
-    if (err) {
-      return console.log(err);
-    }
-    console.log(body);
-    theDig = body;
+  return axios.get(reqString).then(function(response){
+          return response.data        
+      })
+
+  };
+
+  const getDtrace = (args) => {
+    let reqString = `http://sonarliteremote1.constellix.com/dig/trace/${args.host}`
+
+    return axios.get(reqString).then(function(response){
+      return response.data
+    })
   }
-);
-
-const getDig = () => {
-  console.log(theDig);
-  return theDig;
-};
 
 var root = {
   allCourses: getAllCourses,
   course: getCourse,
   courses: getCourses,
-  dig: getDig
+  dig: getDig,
+  dtrace: getDtrace
 };
 // Create an express server and a GraphQL endpoint
-var app = express();
 
 app.use(
   "/graphql",
